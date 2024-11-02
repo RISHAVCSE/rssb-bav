@@ -16,4 +16,45 @@ export class BooksService{
         }
 
     }
+    public static async addBook(newBook: Book): Promise<Book> {
+        try {
+          const response = await fetch(`http://localhost:8080/api/books/addbooks`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newBook),
+          });
+          if (!response.ok) {
+            throw new Error('Failed to add book');
+          }
+          const data: Book = await response.json();
+          return data;
+        } catch (error) {
+          console.error('Error adding book', error);
+          throw error;
+        }
+      }
+
+      public static async update(newBook: any,bookid: any): Promise<Book> {
+        try {
+          const response = await fetch(`http://localhost:8080/api/books/updateBook/`+bookid, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newBook),
+          });
+          if (!response.ok) {
+            throw new Error('Failed to add book');
+          }
+          const data: Book = await response.json();
+          return data;
+        } catch (error) {
+          console.error('Error adding book', error);
+          throw error;
+        }
+      }
+
+
 }
