@@ -27,6 +27,14 @@
 .App-link {
   color: #61dafb;
 }
+.css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input {
+height: '1em' !important;
+}
+.MuiInputBase-input{
+  height: '1em' !important;
+
+}
+
 
 @keyframes App-logo-spin {
   from {
