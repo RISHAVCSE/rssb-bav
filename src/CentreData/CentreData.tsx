@@ -11,12 +11,14 @@ import {
   TablePagination,
   TextField,
   IconButton,
+  MenuItem,
 } from "@mui/material";
 import SearchAppBar from "../Components/SearchBar/Search";
 import { Edit, Save, Cancel, Delete,ExpandMore, ExpandLess } from "@mui/icons-material";
 import { BooksService } from "../services/booksService";
-import AddBook from "./AddBook";
 import AllotedBookTable from "../AllotedBookTable/AllotedBookTable";
+import { CentreService } from "../services/centreService";
+import { AllotedBookService } from "../services/allotedBookService";
 
 interface Row {
   [key: string]: string | number;
@@ -27,6 +29,10 @@ type Book = {
   quantity?: number;
   amount?: number;
 };
+interface ICentre {
+    centreCode: number;
+    centreName: string;
+  }
 
 const columns = [
   { id: "mmsId", label: "MMS Code", minWidth: 170 },
@@ -70,8 +76,8 @@ type AddBookDialogHandle = {
   openDialog: () => void;
 };
 
-const BookDashboard: React.FC = () => {
-  const addBookRef = useRef<AddBookDialogHandle | null>(null);
+const CentreData: React.FC = () => {
+//   const addBookRef = useRef<AddBookDialogHandle | null>(null);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(100);
@@ -81,36 +87,45 @@ const BookDashboard: React.FC = () => {
   const [editingData, setEditingData] = useState<Row | null>(null);
   const [originalData, setOriginalData] = useState<Row | null>(null);
 
-  //For Expand
-  const [expandedRow, setExpandedRow] = useState<number | null>(null);
-  const [expandedData, setExpandedData] = useState<any>(null);
 
-  const handleRowClick = async (mmsId: number) => {
-    // Toggle the expanded row
-    if (expandedRow === mmsId) {
-      setExpandedRow(null);
-      setExpandedData(null);
-      return;
+
+  //For CentreDropdown
+  const [centreList,setCentreList]=useState<ICentre[]>([]);
+  const [selectedCentre,setSelectedCentre]=useState<any>(null);
+
+  useEffect(()=>{
+    const fetchAllCentre=async()=>{
+        try {
+            const centres=await CentreService.fetchAllCentre();
+            setCentreList(centres);
+            if(centres.length>0){
+                setSelectedCentre(centres[0]);
+            }
+        } catch(error){
+
+        }
+    };
+    fetchAllCentre();
+  },[]);
+
+  const handleCentreChange=(event: React.ChangeEvent<{value: unknown}>)=>{
+    const selectedCentreCode=Number(event.target.value);
+    const selectCentre=centreList.find((c)=> c.centreCode===selectedCentreCode);
+    if(selectCentre){
+        setSelectedCentre(selectCentre);
+        loadBooks(selectCentre.centreCode);
+
     }
-    
-    setExpandedRow(mmsId); // Set the new expanded row
-  
-    try {
-      // const response = await BooksService.fetchBookDetails(mmsId); // Replace with the appropriate service call
-      // setExpandedData(response); // Store the fetched data to pass to the component
-    } catch (error) {
-      console.error("Error fetching book details:", error);
-    }
-  };
+  }
   
 
 
   // Open AddBook Dialog
-  const openAddBookPopup = () => {
-    if (addBookRef.current) {
-      addBookRef.current.openDialog();
-    }
-  };
+//   const openAddBookPopup = () => {
+//     if (addBookRef.current) {
+//       addBookRef.current.openDialog();
+//     }
+//   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -128,12 +143,12 @@ const BookDashboard: React.FC = () => {
   };
 
 
-  const loadBooks = async () => {
+  const loadBooks = async (centreCode: any) => {
     try {
-      const fetchedBooks = await BooksService.fetchAllBooks();
+      const fetchedBooks = await AllotedBookService.getAllBookBasedUponCentre(centreCode);
       if (Array.isArray(fetchedBooks)) {
         const transformedData = fetchedBooks.map((item: any) =>
-          createData(item.mmsId, item.bookName, item.quantity, item.amount)
+          createData(item.book.mmsId, item.book.bookName, item.allocatedQuantity, item.book.amount)
         );
         setRows(transformedData);
       } else {
@@ -145,18 +160,11 @@ const BookDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadBooks();
-  }, []);
-
-  const handleBookSubmit = async (newBook: any) => {
-    try {
-      await BooksService.addBook(newBook);
-    } catch (error) {
-      console.error("Error adding book:", error);
+    if (selectedCentre) {
+      loadBooks(selectedCentre.centreCode);
     }
-    await  loadBooks(); // Refresh after adding a book
+  }, [selectedCentre]);
 
-  };
 
   const handleEditClick = (mmsId: number) => {
     setEditingRowId(mmsId);
@@ -178,18 +186,22 @@ const BookDashboard: React.FC = () => {
       const updatedRows = rows.map(row =>
         row.mmsId === editingData.mmsId ? editingData : row
       );
-      setRows(updatedRows);
       setEditingRowId(null);
       setEditingData(null);
 
       try {
-        await BooksService.update(editingData, editingData.mmsId);
+        const newCentre={
+            centreCode: selectedCentre.centreCode,
+            quantity: editingData.quantity,
+            mmsId: editingData.mmsId,
+        }
+        await AllotedBookService.allocateOrChangeCenterData(newCentre);
       
       } catch (error) {
         console.error("Error saving book:", error);
       }
     }
-    loadBooks();
+    loadBooks(selectedCentre.centreCode);
 
   };
 
@@ -222,10 +234,24 @@ const BookDashboard: React.FC = () => {
 
   return (
     <Paper>
-      <SearchAppBar title={"Books Table"} onSearchChange={handleSearchChange} />
-      <div>
+      <SearchAppBar title={selectedCentre?.centreName|| null} onSearchChange={handleSearchChange} />
+      {/* <div>
         <button onClick={openAddBookPopup}>Add Books</button>
         <AddBook ref={addBookRef} onBookSubmit={handleBookSubmit} />
+      </div> */}
+      <div  style={{display: "flex",justifyContent: "flex-end",margin: "16px"}}>
+        <TextField
+         select 
+         label="Select Centre" 
+         value={selectedCentre?.centreCode || ""} 
+         onChange={handleCentreChange}
+         style={{minWidth: "200px"}}>
+            {centreList.map((center)=>(
+                <MenuItem key={center.centreCode} value={center.centreCode}>
+                    {center.centreName}
+                </MenuItem>
+            ))}
+         </TextField>
       </div>
 
       <TableContainer sx={{ maxHeight: 440 }}>
@@ -242,7 +268,6 @@ const BookDashboard: React.FC = () => {
           <TableBody>
       {filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
         const isEditing = row.mmsId === editingRowId;
-        const isExpanded = row.mmsId === expandedRow; // Track if the row is expanded
 
         return (
           <React.Fragment key={row.mmsId}>
@@ -251,7 +276,7 @@ const BookDashboard: React.FC = () => {
                 const value = row[column.id];
 
                 // Check if this column is for editing fields
-                if (isEditing && column.id !== "actions") {
+                if (isEditing && column.id === "quantity") {
                   return (
                     <TableCell key={column.id}>
                       <TextField
@@ -277,15 +302,7 @@ const BookDashboard: React.FC = () => {
                           <IconButton onClick={() => handleEditClick(row.mmsId as number)}>
                             <Edit />
                           </IconButton>
-                          {isExpanded ? (
-                            <IconButton onClick={() => setExpandedRow(null)}>
-                              <ExpandLess />
-                            </IconButton>
-                          ) : (
-                            <IconButton onClick={() => handleRowClick(row.mmsId as number)}>
-                              <ExpandMore />
-                            </IconButton>
-                          )}
+                         
                         </>
                       )}
                     </TableCell>
@@ -299,17 +316,6 @@ const BookDashboard: React.FC = () => {
                 }
               })}
             </TableRow>
-
-            {/* Conditionally render expanded row */}
-            {isExpanded && (
-              <TableRow>
-                <TableCell colSpan={columns.length}>
-                  {/* Expanded content goes here */}
-                  {/* Example: <ExpandedBookDetails data={expandedData} /> */}
-                  <AllotedBookTable mmsId={row.mmsId} />
-                </TableCell>
-              </TableRow>
-            )}
           </React.Fragment>
         );
       })}
@@ -330,4 +336,4 @@ const BookDashboard: React.FC = () => {
   );
 };
 
-export default BookDashboard;
+export default CentreData;

@@ -5,12 +5,15 @@ import App from './App';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './Dashboard/dashboard';
 import BookDashboard from './BookDashboard/BookDashboard';
+import CentreData from './CentreData/CentreData';
 
 const router = (
   <Routes>
     <Route path="/" element={<Dashboard />} />
     <Route path="/dashboard" element={<Dashboard />} />
     <Route path="/books" element={<BookDashboard />} />
+    <Route path="/centre" element={<CentreData />} />
+
   </Routes>
 );
 

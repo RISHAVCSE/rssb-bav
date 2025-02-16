@@ -11,7 +11,8 @@ import { useNavigate } from "react-router-dom";
 const Dashboard: React.FC = () => {
   const history = useNavigate();
 
-  const navigateTo = () => history('/books'); // Change this to history('/books') if you want to navigate to '/books'
+  const navigateToBooks = () => history('/books'); // Change this to history('/books') if you want to navigate to '/books'
+  const navigateToCentre = () => history('/centre'); // Change this to history('/books') if you want to navigate to '/books'
 
   return (
     <Box
@@ -24,7 +25,7 @@ const Dashboard: React.FC = () => {
         padding: 2,
       }}
     >
-      <Card onClick={navigateTo} sx={{ minWidth: 275 }}>
+      <Card onClick={navigateToBooks} sx={{ minWidth: 275 }}>
         <CardHeader
           title={
             <Typography sx={{ fontSize: 14 }} color="text.secondary">
@@ -41,25 +42,14 @@ const Dashboard: React.FC = () => {
           </Typography>
         </CardContent>
       </Card>
-      <Card sx={{ minWidth: 275 }}>
+      <Card onClick={navigateToCentre} sx={{ minWidth: 275 }}>
         <CardHeader
           title={
             <Typography sx={{ fontSize: 14 }} color="text.secondary">
-              Photos/Video/Pen Drive
+              Centre Data 
             </Typography>
           }
         />
-        <CardContent>
-          <Typography sx={{ mb: 1.5 }} color="#8b0000" gutterBottom>
-            Photos -
-          </Typography>
-          <Typography sx={{ mb: 1.5 }} color="#8b0000" gutterBottom>
-            Video -
-          </Typography>
-          <Typography sx={{ mb: 1.5 }} color="#8b0000">
-            Pen Drive -
-          </Typography>
-        </CardContent>
       </Card>
       <Card sx={{ minWidth: 275 }}>
         <CardHeader

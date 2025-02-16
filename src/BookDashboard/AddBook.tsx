@@ -13,15 +13,15 @@ import * as Yup from 'yup';
 import { Height, Padding } from '@mui/icons-material';
 
 interface Values {
-  mms_Id: number;
-  book_name: string;
+  mmsId: number;
+  bookName: string;
   quantity: number;
   amount: number;
 }
 
 type Book = {
-  mms_Id?: number;
-  book_name?: string;
+  mmsId?: number;
+  bookName?: string;
   quantity?: number;
   amount?: number;
 };
@@ -62,8 +62,8 @@ const AddBook = forwardRef((props: { onBookSubmit: (book: Book) => void }, ref) 
   };
   const validationSchema= Yup.object().shape(
     {
-      mms_Id: Yup.number().min(2,'Value must be greater than 2').required('Field is required'),
-      book_name: Yup.string().min(2,'Value must be greater than 2').required('Field is required'),
+      mmsId: Yup.number().min(2,'Value must be greater than 2').required('Field is required'),
+      bookName: Yup.string().min(2,'Value must be greater than 2').required('Field is required'),
       quantity: Yup.number().min(2,'Value must be greater than 2').required('Field is required'),
       amount:  Yup.number().min(2,'Value must be greater than 2').required('Field is required'),
       
@@ -100,21 +100,21 @@ const AddBook = forwardRef((props: { onBookSubmit: (book: Book) => void }, ref) 
   validateOnSubmit={true}
 >
   {({ values, handleChange, handleBlur, touched, errors, isSubmitting }) => {
-    const { mms_Id, book_name, quantity, amount } = values;
+    const { mmsId, bookName, quantity, amount } = values;
 
     return (
       <Form>  {/* No need to add onSubmit here */}
         <TextField
           label="MMS ID"
-          name="mms_Id"
+          name="mmsId"
           fullWidth
-          value={mms_Id}
+          value={mmsId}
           variant="outlined"
           margin="dense"
           onChange={handleChange}
           onBlur={handleBlur}
-          error={Boolean(errors.mms_Id)}
-          helperText={errors.mms_Id}
+          error={Boolean(errors.mmsId)}
+          helperText={errors.mmsId}
           sx={{
             '& .MuiOutlinedInput-input': {
               height: '1em',
@@ -124,15 +124,15 @@ const AddBook = forwardRef((props: { onBookSubmit: (book: Book) => void }, ref) 
 
         <TextField
           label="Book Name"
-          name="book_name"
-          value={book_name}
+          name="bookName"
+          value={bookName}
           fullWidth
           variant="outlined"
           margin="dense"
           onChange={handleChange}
           onBlur={handleBlur}
-          error={Boolean(errors.book_name)}
-          helperText={errors.book_name}
+          error={Boolean(errors.bookName)}
+          helperText={errors.bookName}
           sx={{
             '& .MuiOutlinedInput-input': {
               height: '1em',
