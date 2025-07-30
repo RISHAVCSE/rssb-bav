@@ -16,6 +16,7 @@ import SearchAppBar from "../Components/SearchBar/Search";
 import { Edit, Save, Cancel, Delete,ExpandMore, ExpandLess } from "@mui/icons-material";
 import { BooksService } from "../services/booksService";
 import AddBook from "./AddBook";
+import CustomSnackbar from "../CustomSnackBar/CustomSnackBar";
 import AllotedBookTable from "../AllotedBookTable/AllotedBookTable";
 
 interface Row {
@@ -25,27 +26,42 @@ type Book = {
   mmsId?: number;
   bookName?: string;
   quantity?: number;
+  allotedQuantity?: number;
   amount?: number;
 };
 
 const columns = [
-  { id: "mmsId", label: "MMS Code", minWidth: 170 },
-  { id: "bookName", label: "ITEMS", minWidth: 100 },
+  { id: "mmsId", label: "MMS Code", minWidth: 170  },
+  { id: "bookName", label: "ITEMS", minWidth: 100, editable:true },
   {
-    id: "quantity",
-    label: "Quantity",
+    id: "stockavailable",
+    label: "Quantity Available",
+    minWidth: 170,
+    editable:true,
+    format: (value: number) => value.toLocaleString("en-US"),
+  },
+  {
+    id: "allotedQuantity",
+    label: "Quantity Alloted",
+    minWidth: 170,
+    format: (value: number) => value.toLocaleString("en-US"),
+  },
+  {
+    id: "pendingForApprovalQuantity",
+    label: "Pending For Sale",
     minWidth: 170,
     format: (value: number) => value.toLocaleString("en-US"),
   },
   {
     id: "amount",
-    label: "Amount",
+    label: "Price",
     minWidth: 170,
+    editable:true,
     format: (value: number) => value.toLocaleString("en-US"),
   },
   {
     id: "density",
-    label: "Value",
+    label: "Quantity Available Value",
     minWidth: 170,
     format: (value: number) => value.toFixed(2),
   },
@@ -60,10 +76,14 @@ function createData(
   mmsId: number,
   bookName: string,
   quantity: number,
-  amount: number
+  amount: number,
+  allotedQuantity: number,
+  pendingForApprovalQuantity: number
 ): Row {
-  const density = quantity * amount;
-  return { mmsId, bookName, quantity, amount, density };
+  const stockavailable=quantity-allotedQuantity-pendingForApprovalQuantity;
+  const density = stockavailable * amount;
+
+  return { mmsId, bookName, stockavailable,allotedQuantity,pendingForApprovalQuantity, amount, density };
 }
 
 type AddBookDialogHandle = {
@@ -80,6 +100,17 @@ const BookDashboard: React.FC = () => {
   const [editingRowId, setEditingRowId] = useState<number | null>(null);
   const [editingData, setEditingData] = useState<Row | null>(null);
   const [originalData, setOriginalData] = useState<Row | null>(null);
+
+  //SnackBar
+  const [snackbar, setSnackbar] = useState<{ 
+    open: boolean; 
+    message: string; 
+    type: "success" | "error"; 
+}>({
+    open: false,
+    message: "",
+    type: "success"
+});
 
   //For Expand
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
@@ -133,7 +164,7 @@ const BookDashboard: React.FC = () => {
       const fetchedBooks = await BooksService.fetchAllBooks();
       if (Array.isArray(fetchedBooks)) {
         const transformedData = fetchedBooks.map((item: any) =>
-          createData(item.mmsId, item.bookName, item.quantity, item.amount)
+          createData(item.mmsId, item.bookName, item.quantity, item.amount,item.allotedQuantity,item.pendingForApprovalQuantity)
         );
         setRows(transformedData);
       } else {
@@ -150,20 +181,30 @@ const BookDashboard: React.FC = () => {
 
   const handleBookSubmit = async (newBook: any) => {
     try {
-      await BooksService.addBook(newBook);
-    } catch (error) {
-      console.error("Error adding book:", error);
+      const { message } = await BooksService.addBook(newBook);
+      setSnackbar({
+          open: true,
+          message: message, // Use the API's success message
+          type: "success"
+      });
+      await loadBooks();
+  } catch (error: any) {
+        setSnackbar({ 
+            open: true, 
+            message: error.message || "Something went wrong!", 
+            type: "error" 
+        });
+        console.error("Error adding book:", error);
     }
-    await  loadBooks(); // Refresh after adding a book
-
-  };
+};
 
   const handleEditClick = (mmsId: number) => {
     setEditingRowId(mmsId);
     const rowData = rows.find(row => row.mmsId === mmsId);
     if (rowData) {
       setOriginalData({ ...rowData });
-      setEditingData({ ...rowData });
+      setEditingData({ ...rowData, stockavailable: "" }); // clear stockavailable
+
     }
   };
 
@@ -183,9 +224,20 @@ const BookDashboard: React.FC = () => {
       setEditingData(null);
 
       try {
-        await BooksService.update(editingData, editingData.mmsId);
-      
-      } catch (error) {
+       
+        const { message } =  await BooksService.update(editingData, editingData.mmsId);
+        setSnackbar({
+            open: true,
+            message: message, // Use the API's success message
+            type: "success"
+        });
+        await loadBooks();
+      } catch (error: any) {
+        setSnackbar({ 
+          open: true, 
+          message: error.message || "Something went wrong!", 
+          type: "error" 
+      });
         console.error("Error saving book:", error);
       }
     }
@@ -222,6 +274,12 @@ const BookDashboard: React.FC = () => {
 
   return (
     <Paper>
+ <CustomSnackbar 
+        open={snackbar.open} 
+        handleClose={() => setSnackbar({ ...snackbar, open: false })} 
+        message={snackbar.message} 
+        type={snackbar.type} 
+      />
       <SearchAppBar title={"Books Table"} onSearchChange={handleSearchChange} />
       <div>
         <button onClick={openAddBookPopup}>Add Books</button>
@@ -251,13 +309,16 @@ const BookDashboard: React.FC = () => {
                 const value = row[column.id];
 
                 // Check if this column is for editing fields
-                if (isEditing && column.id !== "actions") {
+                if (isEditing && column.editable && column.id !== "actions") {
                   return (
                     <TableCell key={column.id}>
                       <TextField
-                        value={editingData?.[column.id] || ""}
-                        onChange={(e) => handleInputChange(column.id, e.target.value)}
-                      />
+        value={editingData?.[column.id] || ""}
+        onChange={(e) => handleInputChange(column.id, e.target.value)}
+        placeholder={column.id === 'stockavailable' 
+          ? `Current: ${originalData?.stockavailable}` 
+          : ''}
+      />
                     </TableCell>
                   );
                 } else if (column.id === "actions") {
@@ -306,7 +367,7 @@ const BookDashboard: React.FC = () => {
                 <TableCell colSpan={columns.length}>
                   {/* Expanded content goes here */}
                   {/* Example: <ExpandedBookDetails data={expandedData} /> */}
-                  <AllotedBookTable mmsId={row.mmsId} />
+                  <AllotedBookTable mmsId={row.mmsId} onApiComplete={loadBooks} />
                 </TableCell>
               </TableRow>
             )}

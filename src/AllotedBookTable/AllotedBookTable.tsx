@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { boolean } from "yup";
 import { AllotedBookService } from "../services/allotedBookService";
 import { CentreService } from "../services/centreService";
+import CustomSnackbar from "../CustomSnackBar/CustomSnackBar";
 
 
 
@@ -19,17 +20,22 @@ interface ICentre{
 }
 interface AllotedBookTableProps {
     mmsId: any;
+    onApiComplete?: () => void;
+
 }
 
-const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId}) => {
+const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId,onApiComplete }) => {
 
-    const [centrebook,setCentreBook]=useState<CentreBook[]>([
-        // {centreCode:1,centreName: "Amb",allocatedQuantity:20},
-        // {centreCode:2,centreName: "Una",allocatedQuantity:10},
-        // {centreCode:3,centreName: "Shimla",allocatedQuantity:5}
-
-
-    ]);
+    const [centrebook,setCentreBook]=useState<CentreBook[]>([]);
+      const [snackbar, setSnackbar] = useState<{ 
+        open: boolean; 
+        message: string; 
+        type: "success" | "error"; 
+    }>({
+        open: false,
+        message: "",
+        type: "success"
+    });
 
     const [expandedCards, setExpandedCards]=useState<{[key: number]: boolean}>({});
     const [editingId, setEditingId]=useState<number | null>(null);
@@ -41,24 +47,6 @@ const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId}) => {
     const [newCentre,setNewCentre]=useState<ICentre | null>(null);
     const [newQuantity,setNewQuantity]=useState<number>(0);
 
-    // useEffect(()=> {
-    //     const fetchData=async()=>{
-    //         try{
-    //             const response=await AllotedBookService.getBookBasedUponCentre(mmsId);
-    //             if(response){
-    //                 setCentreBook(response);
-
-    //             } else{
-    //                 setCentreBook([]); // Set to empty array if no data is found
-
-    //             }
-    //         } catch(error){
-    //             console.error("Failed to fetch",error);
-    //         }
-    //     }
-    //     fetchData();
-
-    // }, [mmsId]);
     const fetchData = async () => {
         try {
             const response = await AllotedBookService.getBookBasedUponCentre(mmsId);
@@ -133,8 +121,20 @@ const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId}) => {
 
         
         setExpandedCards((prev) => ({ ...prev, [editedBook!.centre.centreCode]: false })); // Collapse the card
-    } catch (error){
-        alert('Failed to Save the data');
+        if (onApiComplete) {
+            onApiComplete();
+          }
+        setSnackbar({
+            open: true,
+            message: response.message, // Use the API's success message
+            type: "success"
+        });
+    } catch (error: any){
+        setSnackbar({
+            open: true,
+            message: error.message, // Use the API's success message
+            type: "error"
+        });
     }
         }
     };
@@ -202,6 +202,12 @@ const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId}) => {
   return (
     <Paper style={{padding: "16px"}}>
         {/* //Card Layout */}
+        <CustomSnackbar 
+                open={snackbar.open} 
+                handleClose={() => setSnackbar({ ...snackbar, open: false })} 
+                message={snackbar.message} 
+                type={snackbar.type} 
+              />
         <Grid container spacing={3}>
             {centrebook.map((i)=>(
                 <Grid item xs={12} sm={6} md={3} key={i.centre.centreCode}>

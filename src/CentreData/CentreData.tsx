@@ -12,6 +12,7 @@ import {
   TextField,
   IconButton,
   MenuItem,
+  Button,
 } from "@mui/material";
 import SearchAppBar from "../Components/SearchBar/Search";
 import { Edit, Save, Cancel, Delete,ExpandMore, ExpandLess } from "@mui/icons-material";
@@ -19,6 +20,7 @@ import { BooksService } from "../services/booksService";
 import AllotedBookTable from "../AllotedBookTable/AllotedBookTable";
 import { CentreService } from "../services/centreService";
 import { AllotedBookService } from "../services/allotedBookService";
+import SalesData from "./SalesData";
 
 interface Row {
   [key: string]: string | number;
@@ -92,6 +94,7 @@ const CentreData: React.FC = () => {
   //For CentreDropdown
   const [centreList,setCentreList]=useState<ICentre[]>([]);
   const [selectedCentre,setSelectedCentre]=useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(()=>{
     const fetchAllCentre=async()=>{
@@ -117,6 +120,25 @@ const CentreData: React.FC = () => {
 
     }
   }
+
+  const handleDataFromChild = async(data: any)=>{
+    try {
+      const newCentre={
+          centreCode: selectedCentre.centreCode,
+          books: data.books,
+          currentTime: "2023-10-25T12:34:56",
+      }
+      await AllotedBookService.salesData(newCentre);
+    
+    } catch (error) {
+      console.error("Error saving book:", error);
+    }
+  
+  loadBooks(selectedCentre.centreCode);
+    setIsDialogOpen(false);
+  }
+
+
   
 
 
@@ -204,7 +226,14 @@ const CentreData: React.FC = () => {
     loadBooks(selectedCentre.centreCode);
 
   };
+  
+ const handleOpenDialog=()=>{
+  setIsDialogOpen(true);
 
+ }
+ const handleCloseDialog=()=>{
+  setIsDialogOpen(false);
+ }
   const handleCancelClick = () => {
     if (originalData) {
       const updatedRows = rows.map((row) =>
@@ -233,12 +262,14 @@ const CentreData: React.FC = () => {
   );
 
   return (
-    <Paper>
+    <Paper >
       <SearchAppBar title={selectedCentre?.centreName|| null} onSearchChange={handleSearchChange} />
-      {/* <div>
-        <button onClick={openAddBookPopup}>Add Books</button>
-        <AddBook ref={addBookRef} onBookSubmit={handleBookSubmit} />
-      </div> */}
+      <div>
+      <Button variant="contained" color="primary" onClick={handleOpenDialog}>
+        Open Sales Data Dialog
+      </Button>
+        <SalesData openState={isDialogOpen} onDataSubmit={handleDataFromChild} items={rows} onClose={handleCloseDialog}/>
+      </div>
       <div  style={{display: "flex",justifyContent: "flex-end",margin: "16px"}}>
         <TextField
          select 
@@ -252,6 +283,7 @@ const CentreData: React.FC = () => {
                 </MenuItem>
             ))}
          </TextField>
+       
       </div>
 
       <TableContainer sx={{ maxHeight: 440 }}>
