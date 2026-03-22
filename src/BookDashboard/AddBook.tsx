@@ -6,6 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Formik, Form, Field, FormikHelpers, ErrorMessage } from 'formik';
+import {MenuItem} from '@mui/material';
 import Paper, { PaperProps } from '@mui/material/Paper';
 import Draggable from 'react-draggable';
 import { Box, TextField } from '@mui/material';
@@ -24,7 +25,14 @@ type Book = {
   bookName?: string;
   quantity?: number;
   amount?: number;
+  type?: number;
 };
+const bookTypes = [
+  { value: 1, label: 'Books' },
+  { value: 2, label: 'A/V' },
+  { value: 3, label: 'Photo' },
+  { value: 4, label: 'Miscellaneous' },
+];
 
 function PaperComponent(props: PaperProps) {
   return (
@@ -66,6 +74,7 @@ const AddBook = forwardRef((props: { onBookSubmit: (book: Book) => void }, ref) 
       bookName: Yup.string().min(2,'Value must be greater than 2').required('Field is required'),
       quantity: Yup.number().min(2,'Value must be greater than 2').required('Field is required'),
       amount:  Yup.number().min(2,'Value must be greater than 2').required('Field is required'),
+      type: Yup.number().required('Please select a book type')
       
     }
   )
@@ -175,6 +184,32 @@ const AddBook = forwardRef((props: { onBookSubmit: (book: Book) => void }, ref) 
             },
           }}
         />
+        <TextField
+  select // This makes it a dropdown
+  label="Book Type"
+  name="type"
+  fullWidth
+  variant="outlined"
+  margin="dense"
+  value={values.type || ''} // Ensure it doesn't crash if undefined
+  onChange={handleChange}
+  onBlur={handleBlur}
+  error={Boolean(errors.type) && touched.type}
+  helperText={touched.type && errors.type}
+  sx={{
+    '& .MuiOutlinedInput-input': {
+      height: '1em',
+      display: 'flex',
+      alignItems: 'center'
+    },
+  }}
+>
+  {bookTypes.map((option) => (
+    <MenuItem key={option.value} value={option.value}>
+      {option.label}
+    </MenuItem>
+  ))}
+</TextField>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
           <Button

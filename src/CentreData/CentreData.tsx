@@ -165,21 +165,26 @@ const CentreData: React.FC = () => {
   };
 
 
-  const loadBooks = async (centreCode: any) => {
-    try {
-      const fetchedBooks = await AllotedBookService.getAllBookBasedUponCentre(centreCode);
-      if (Array.isArray(fetchedBooks)) {
-        const transformedData = fetchedBooks.map((item: any) =>
-          createData(item.book.mmsId, item.book.bookName, item.allocatedQuantity, item.book.amount)
-        );
-        setRows(transformedData);
-      } else {
-        console.error("Fetched data is not an array:", fetchedBooks);
-      }
-    } catch (error) {
-      console.error("Error loading books:", error);
+const loadBooks = async (centreCode: any) => {
+  try {
+    const fetchedBooks = await AllotedBookService.getAllBookBasedUponCentre(centreCode);
+    if (Array.isArray(fetchedBooks)) {
+      const transformedData = fetchedBooks.map((item: any) =>
+        createData(
+          Number(item.mmsId), 
+          item.bookName, 
+          item.quantity,  // Direct property access
+          item.amount     // Direct property access
+        )
+      );
+      setRows(transformedData);
+    } else {
+      console.error("Fetched data is not an array:", fetchedBooks);
     }
-  };
+  } catch (error) {
+    console.error("Error loading books:", error);
+  }
+};
 
   useEffect(() => {
     if (selectedCentre) {
@@ -214,9 +219,13 @@ const CentreData: React.FC = () => {
       try {
         const newCentre={
             centreCode: selectedCentre.centreCode,
-            quantity: editingData.quantity,
+               quantity: Number(editingData.quantity) || 0, // Fallback to 0 if invalid
             mmsId: editingData.mmsId,
         }
+         if (isNaN(newCentre.quantity) || newCentre.quantity <= 0) {
+        alert("Please enter a valid quantity greater than 0");
+        return;
+      }
         await AllotedBookService.allocateOrChangeCenterData(newCentre);
       
       } catch (error) {

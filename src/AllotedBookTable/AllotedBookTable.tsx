@@ -9,7 +9,7 @@ import CustomSnackbar from "../CustomSnackBar/CustomSnackBar";
 
 
 interface CentreBook {
-    allocatedQuantity: any,
+    quantity: any,
     centre: ICentre;
 
 }
@@ -107,7 +107,7 @@ const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId,onApiComplete 
             try{
                 const newCentre={
                     centreCode: editedBook.centre.centreCode,
-                    quantity: editedBook.allocatedQuantity,
+                    quantity: editedBook.quantity,
                     mmsId: mmsId,
                 }
            
@@ -138,6 +138,43 @@ const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId,onApiComplete 
     }
         }
     };
+
+    //Save New Book 
+        const handleAddNewAllocation= async()=>{
+        if(newCentre && newQuantity!=0){
+                try{
+                const data1={
+                    centreCode: newCentre.centreCode,
+
+                    quantity: newQuantity,
+                    mmsId: mmsId,
+                }
+           
+            const response= await AllotedBookService.addBookBasedUponCentre(data1);
+            setIsAdding(false);
+            setNewCentre(null);
+            setNewQuantity(0);
+            fetchData();
+               if (onApiComplete) {
+                onApiComplete();
+            }
+              setSnackbar({
+            open: true,
+            message: response.message, // Use the API's success message
+            type: "success"
+        });
+        } catch(error: any){
+           setSnackbar({
+            open: true,
+            message: error.message, // Use the API's success message
+            type: "error"
+        });
+        }
+    }else{
+        alert("Please select a centre and enter a valid quantity.");
+
+    }
+}
 
     const handleAdd= ()=>{
         setIsAdding(true);
@@ -174,29 +211,7 @@ const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId,onApiComplete 
         setIsAdding(false);
         
     }
-    const handleAddNewAllocation= async()=>{
-        if(newCentre && newQuantity!=0){
-                try{
-                const data1={
-                    centreCode: newCentre.centreCode,
 
-                    quantity: newQuantity,
-                    mmsId: mmsId,
-                }
-           
-            const response= await AllotedBookService.addBookBasedUponCentre(data1);
-            setIsAdding(false);
-            setNewCentre(null);
-            setNewQuantity(0);
-            fetchData();
-        } catch(error){
-            alert("Please select a centre and enter a valid quantity.");
-        }
-    }else{
-        alert("Please select a centre and enter a valid quantity.");
-
-    }
-}
   
 
   return (
@@ -217,14 +232,15 @@ const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId,onApiComplete 
 
                             <div style={{display: "flex",flexDirection: "column"}}> 
                          <Typography variant="h6" style={{fontWeight: "bold"}}> {i.centre.centreName} </Typography>
-                         <Typography variant="h6" > Alloted Quantity - {i.allocatedQuantity} </Typography>
+                         <Typography variant="h6" > Alloted Quantity - {i.quantity} </Typography>
                          </div>
                          <div> 
                          <IconButton onClick={()=> handleEditAndExpand(i)}>
                                 <Edit />
 
                             </IconButton>
-                            <IconButton onClick={()=> handleDeleteClick(i.centre.centreCode)}>
+                            <IconButton     disabled={true} // Add this prop
+ onClick={()=> handleDeleteClick(i.centre.centreCode)}>
                                 <Delete />
 
                             </IconButton>
@@ -241,8 +257,8 @@ const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId,onApiComplete 
                             {/* <TextField
                             fullWidth
                             label="Quantity"
-                            value={editedBook?.allocatedQuantity ?? ""}
-                            onChange={(e)=> setEditedBook({...editedBook!,allocatedQuantity: Number(e.target.value)})}
+                            value={editedBook?.quantity ?? ""}
+                            onChange={(e)=> setEditedBook({...editedBook!,quantity: Number(e.target.value)})}
                             style={{marginBottom: "8px"}}
                             inputProps={{ inputMode: 'numeric', pattern: '^-?[0-9]*$' }}
 
@@ -250,11 +266,11 @@ const AllotedBookTable: React.FC<AllotedBookTableProps> = ({mmsId,onApiComplete 
     <TextField
   fullWidth
   label="Quantity"
-//   value={editedBook?.allocatedQuantity ?? ""}
+//   value={editedBook?.quantity ?? ""}
   onChange={(e) => {
     const input = e.target.value;
     if (/^-?\d*$/.test(input) || input === "") {
-      setEditedBook({ ...editedBook!, allocatedQuantity: input });
+      setEditedBook({ ...editedBook!, quantity: input });
     }
   }}
   style={{ marginBottom: "8px" }}

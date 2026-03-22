@@ -1,8 +1,18 @@
+import keycloak from "../KeyCloak/KeyCloak";
+const authHeader = () => ({
+  Authorization: `Bearer ${keycloak.token}`,
+});
 export class AllotedBookService {
     public static async getBookBasedUponCentre (mmsId: string): Promise<any>{
 
         try{
-            const response=await fetch(`http://localhost:8080/api/centre-book/getBookBasedUponCentre?mmsId=`+mmsId);
+            const response=await fetch(`http://localhost:8080/api/centre-book/getBookBasedUponCentre?mmsId=`+mmsId,
+                {
+                    headers: {
+                        ...authHeader(),
+
+                    },
+                });
             if(!response.ok){
                 throw new Error('Failed to fetch Records');
             }
@@ -21,6 +31,7 @@ export class AllotedBookService {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                      ...authHeader(),
                 },
                 body: JSON.stringify(newCentre),
             });
@@ -38,9 +49,15 @@ export class AllotedBookService {
     }
 
     public static async getAllBookBasedUponCentre (centreCode: any): Promise<any>{
-
+console.log(keycloak.token,"Nedwi");
         try{
-            const response=await fetch(`http://localhost:8080/api/centre-book/getAllBookBasedUponCentre?centreCode=`+centreCode);
+            const response=await fetch(`http://localhost:8080/api/centre-book/getAllBookBasedUponCentre?centreCode=`+centreCode,
+                {
+                    headers: {
+                        ...authHeader(),
+
+                    },
+                });
             if(!response.ok){
                 throw new Error('Failed to fetch Records');
             }
@@ -56,7 +73,13 @@ export class AllotedBookService {
     public static async getAllAllocationData (): Promise<any>{
 
         try{
-            const response=await fetch(`http://localhost:8080/api/allocation/all`);
+            const response=await fetch(`http://localhost:8080/api/allocation/all`,
+                {
+                    headers: {
+                        ...authHeader(),
+
+                    },
+                });
             if(!response.ok){
                 throw new Error('Failed to fetch Records');
             }
@@ -74,6 +97,7 @@ export class AllotedBookService {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                      ...authHeader(),
                 },
                 body: JSON.stringify(newCentre),
             });
@@ -96,6 +120,7 @@ export class AllotedBookService {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                      ...authHeader(),
                 },
                 body: JSON.stringify(payLoad),
             });

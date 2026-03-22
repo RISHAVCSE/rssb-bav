@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { AllotedBookService } from "../services/allotedBookService";
-
+import keycloak from "../KeyCloak/KeyCloak";
 interface Book {
   mmsId: string;
   bookName: string;
@@ -27,7 +27,9 @@ interface Centre {
   currentTime: string;
   books: Book[];
 }
-
+const authHeader = () => ({
+  Authorization: `Bearer ${keycloak.token}`,
+});
 const AllocationPage: React.FC = () => {
   const [allocatedData, setAllocatedData] = useState<Centre[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -60,7 +62,7 @@ const AllocationPage: React.FC = () => {
         `http://localhost:8080/api/allocation/update?status=${actionType === "approve"}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...authHeader() },
           body: JSON.stringify(selectedCentre), // Send full object
         }
       );

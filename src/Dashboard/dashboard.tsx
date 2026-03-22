@@ -9,6 +9,7 @@ import {
   useTheme,
   styled,
 } from "@mui/material";
+import { useKeycloak } from "@react-keycloak/web";
 import {
   MenuBook as BooksIcon,
   Place as CenterIcon,
@@ -35,6 +36,7 @@ const DashboardCard = styled(Card)(({ theme }) => ({
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { keycloak, initialized } = useKeycloak();
 
   const cards = [
     {
@@ -87,6 +89,7 @@ const Dashboard: React.FC = () => {
       ]
     }
   ];
+  console.log("JWT Token:", keycloak.token); // 👈 HERE
 
   return (
     <Box

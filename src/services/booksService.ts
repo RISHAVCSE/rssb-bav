@@ -1,10 +1,23 @@
 import { Book } from "../interfaces";
-
+import keycloak from "../KeyCloak/KeyCloak";
 const API_URL=process.env.REACT_APP_API_URL;
+
+const authHeader = () => ({
+  Authorization: `Bearer ${keycloak.token}`,
+});
+
+
 export class BooksService{
     public static async fetchAllBooks(): Promise<Book[]>{
         try{
-            const response= await fetch('http://localhost:8080/api/books/booksData');
+            const response= await fetch(`${API_URL}books/booksData`,
+                {
+                    headers: {
+                        ...authHeader(),
+
+                    },
+                }
+            );
             if(!response.ok){
                 throw new Error('Failed to fetch books');
             }
@@ -16,11 +29,35 @@ export class BooksService{
         }
 
     }
+
+ public static async fetchAllDetails(type: number): Promise<Book[]>{
+        try{
+            const response= await fetch(`${API_URL}books/booksData?id=${type}`,
+                {
+                    headers: {
+                        ...authHeader(),
+
+                    },
+                }
+            );
+            if(!response.ok){
+                throw new Error('Failed to fetch books');
+            }
+            const data: Book[]=await response.json();
+            return data;
+        } catch(error){
+            console.error('Error fetching books',error);
+            throw error;
+        }
+
+    }
+
     public static async addBook(newBook: Book): Promise<{ book: Book, message: string }> {
       const response = await fetch(`http://localhost:8080/api/books/addbooks`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
+               ...authHeader(),
           },
           body: JSON.stringify(newBook),
       });
@@ -43,6 +80,7 @@ export class BooksService{
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
+               ...authHeader(),
             },
             body: JSON.stringify(newBook),
           });
