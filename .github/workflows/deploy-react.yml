@@ -1,10 +1,10 @@
-name: Build and Push React
+name: Build and Deploy React
 
 on:
   workflow_dispatch:
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,3 +27,18 @@ jobs:
       - name: Push Docker image
         run: |
           docker push rishavcse1/rssb-react:${{ github.sha }}
+
+      - name: Deploy React to Kubernetes
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: 161.118.167.160
+          username: ubuntu
+          key: ${{ secrets.KUBE_SSH_KEY }}
+          script: |
+            kubectl set image deployment/react \
+              react=rishavcse1/rssb-react:${{ github.sha }}
+
+            kubectl rollout status deployment/react --timeout=180s
+
+            kubectl get deployment react
+            kubectl get pods -l app=react
