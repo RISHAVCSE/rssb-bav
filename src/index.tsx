@@ -1,24 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Dashboard from './Dashboard/dashboard';
-import BookDashboard from './BookDashboard/BookDashboard';
+// src/index.tsx
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
 
-const router = (
-  <Routes>
-    <Route path="/" element={<Dashboard />} />
-    <Route path="/dashboard" element={<Dashboard />} />
-    <Route path="/books" element={<BookDashboard />} />
-  </Routes>
-);
+// <-- fixed casing & paths (must match actual filenames)
 
-ReactDOM.render(
-  <React.StrictMode>
-    <Router>
-      {router}
-    </Router>
-  </React.StrictMode>,
-  document.getElementById('root')
+
+const container = document.getElementById("root")!;
+const root = createRoot(container);
+
+root.render(
+     <App />  
 );

@@ -4,5 +4,11 @@ export interface Book {
     book_name: string;
     quantity: number;
     amount: number;
+    type: number;
+  }
+
+export interface ICentre {
+    centreCode: number;
+    centreName: string;
   }
   
