@@ -22,6 +22,7 @@ import {
   Button
 } from "@mui/material";
 import { CentreService } from "../services/centreService";
+import { API_BASE_URL } from "../services/api";
 import { ICentre } from "../interfaces";
 import SearchAppBar from "../Components/SearchBar/Search";
 import { useState } from 'react';
@@ -139,7 +140,7 @@ const ReceiptHistoryTable: React.FC = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/centre-book/getAllRecordsBasedUponCentre?centreCode=${centreCode}`
+        `${API_BASE_URL}/centre-book/getAllRecordsBasedUponCentre?centreCode=${centreCode}`
       );
       const data = await response.json();
       setRecords(data);

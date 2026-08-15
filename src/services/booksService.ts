@@ -1,6 +1,6 @@
 import { Book } from "../interfaces";
 import keycloak from "../KeyCloak/KeyCloak";
-const API_URL=process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "./api";
 
 const authHeader = () => ({
   Authorization: `Bearer ${keycloak.token}`,
@@ -10,7 +10,7 @@ const authHeader = () => ({
 export class BooksService{
     public static async fetchAllBooks(): Promise<Book[]>{
         try{
-            const response= await fetch(`${API_URL}books/booksData`,
+            const response= await fetch(`${API_BASE_URL}/books/booksData`,
                 {
                     headers: {
                         ...authHeader(),
@@ -32,7 +32,7 @@ export class BooksService{
 
  public static async fetchAllDetails(type: number): Promise<Book[]>{
         try{
-            const response= await fetch(`${API_URL}books/booksData?id=${type}`,
+            const response= await fetch(`${API_BASE_URL}/books/booksData?id=${type}`,
                 {
                     headers: {
                         ...authHeader(),
@@ -53,7 +53,7 @@ export class BooksService{
     }
 
     public static async addBook(newBook: Book): Promise<{ book: Book, message: string }> {
-      const response = await fetch(`http://localhost:8080/api/books/addbooks`, {
+      const response = await fetch(`${API_BASE_URL}/books/addbooks`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export class BooksService{
 
       public static async update(newBook: any,bookid: any): Promise<{ book: Book, message: string }> {
       
-          const response = await fetch(`http://localhost:8080/api/books/updateBook/`+bookid, {
+          const response = await fetch(`${API_BASE_URL}/books/updateBook/`+bookid, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',

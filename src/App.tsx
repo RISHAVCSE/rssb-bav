@@ -11,6 +11,7 @@ import CentreData from './CentreData/CentreData';
 import AllocationPage from './AllocationApproval/AllocationApproval';
 import ReceiptHistoryTable from './ReceiptHistoryTable/ReceiptHistoryTable';
 import CentreManagement from './CentreList';
+import UserManagementDashboard from './UserManagement/UserManagementDashboard';
 
 import keycloak from './KeyCloak/KeyCloak';
 
@@ -38,7 +39,7 @@ const App: React.FC = () => {
 const kcInitOptions = {
   onLoad: 'login-required' as const,
   checkLoginIframe: false,
-  pkceMethod: 'S256' as const,   // ❌ remove this line
+  // pkceMethod: 'S256' as const,   // ❌ remove this line
   silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
 };
 
@@ -72,6 +73,7 @@ const kcInitOptions = {
           <Route path="/approval" element={<ProtectedRoute><AllocationPage /></ProtectedRoute>} />
           <Route path="/historyReceipt" element={<ProtectedRoute><ReceiptHistoryTable /></ProtectedRoute>} />
           <Route path="/centre-list" element={<ProtectedRoute><CentreManagement /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute><UserManagementDashboard /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>

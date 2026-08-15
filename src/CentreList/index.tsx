@@ -26,6 +26,7 @@ import {
   Add as AddIcon,
 } from "@mui/icons-material";
 import axios from "axios";
+import { API_BASE_URL } from "../services/api";
 
 interface Centre {
   centreCode: number;
@@ -58,7 +59,7 @@ const CentreManagement: React.FC = () => {
 
   const fetchCentres = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/centres/getAllCentres");
+      const response = await axios.get(`${API_BASE_URL}/centres/getAllCentres`);
       setCentres(response.data);
     } catch (error) {
       console.error("Error fetching centres:", error);
@@ -82,7 +83,7 @@ const CentreManagement: React.FC = () => {
     if (!editData) return;
     
     try {
-      await axios.put("http://localhost:8080/api/centres/updateCentre", editData);
+      await axios.put(`${API_BASE_URL}/centres/updateCentre`, editData);
       setCentres(centres.map(centre => 
         centre.centreCode === editData.centreCode ? editData : centre
       ));
@@ -120,7 +121,7 @@ const CentreManagement: React.FC = () => {
 
   const handleAddSave = async () => {
     try {
-      const response = await axios.post("http://localhost:8080/api/centres/addCentre", newCentre);
+      const response = await axios.post(`${API_BASE_URL}/centres/addCentre`, newCentre);
       setCentres([...centres, response.data]);
       setIsAdding(false);
           fetchCentres();
@@ -143,7 +144,7 @@ const CentreManagement: React.FC = () => {
     if (centreToDelete === null) return;
     
     try {
-      await axios.delete(`http://localhost:8080/api/centres/deleteCentre/${centreToDelete}`);
+      await axios.delete(`${API_BASE_URL}/centres/deleteCentre/${centreToDelete}`);
       setCentres(centres.filter(centre => centre.centreCode !== centreToDelete));
       setDeleteDialogOpen(false);
       setCentreToDelete(null);

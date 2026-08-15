@@ -1,4 +1,5 @@
 import keycloak from "../KeyCloak/KeyCloak";
+import { API_BASE_URL } from "./api";
 const authHeader = () => ({
   Authorization: `Bearer ${keycloak.token}`,
 });
@@ -6,7 +7,7 @@ export class AllotedBookService {
     public static async getBookBasedUponCentre (mmsId: string): Promise<any>{
 
         try{
-            const response=await fetch(`http://localhost:8080/api/centre-book/getBookBasedUponCentre?mmsId=`+mmsId,
+            const response=await fetch(`${API_BASE_URL}/centre-book/getBookBasedUponCentre?mmsId=`+mmsId,
                 {
                     headers: {
                         ...authHeader(),
@@ -27,7 +28,7 @@ export class AllotedBookService {
 
     public static async addBookBasedUponCentre (newCentre: any): Promise<any>{
 
-            const response=await fetch(`http://localhost:8080/api/centre-book/allocateBooktoCentre`,{
+            const response=await fetch(`${API_BASE_URL}/centre-book/allocateBooktoCentre`,{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ export class AllotedBookService {
     public static async getAllBookBasedUponCentre (centreCode: any): Promise<any>{
 console.log(keycloak.token,"Nedwi");
         try{
-            const response=await fetch(`http://localhost:8080/api/centre-book/getAllBookBasedUponCentre?centreCode=`+centreCode,
+            const response=await fetch(`${API_BASE_URL}/centre-book/getAllBookBasedUponCentre?centreCode=`+centreCode,
                 {
                     headers: {
                         ...authHeader(),
@@ -73,7 +74,7 @@ console.log(keycloak.token,"Nedwi");
     public static async getAllAllocationData (): Promise<any>{
 
         try{
-            const response=await fetch(`http://localhost:8080/api/allocation/all`,
+            const response=await fetch(`${API_BASE_URL}/allocation/all`,
                 {
                     headers: {
                         ...authHeader(),
@@ -93,7 +94,7 @@ console.log(keycloak.token,"Nedwi");
     }
     public static async allocateOrChangeCenterData (newCentre: any): Promise<any>{
         try{
-            const response=await fetch(`http://localhost:8080/api/centre-book/allocateOrChangeCenterData`,{
+            const response=await fetch(`${API_BASE_URL}/centre-book/allocateOrChangeCenterData`,{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -116,7 +117,7 @@ console.log(keycloak.token,"Nedwi");
 
     public static async salesData (payLoad: any): Promise<any>{
         try{
-            const response=await fetch(`http://localhost:8080/api/allocation/add`,{
+            const response=await fetch(`${API_BASE_URL}/allocation/add`,{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

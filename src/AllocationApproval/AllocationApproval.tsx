@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { AllotedBookService } from "../services/allotedBookService";
+import { API_BASE_URL } from "../services/api";
 import keycloak from "../KeyCloak/KeyCloak";
 interface Book {
   mmsId: string;
@@ -59,7 +60,7 @@ const AllocationPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/allocation/update?status=${actionType === "approve"}`,
+        `${API_BASE_URL}/allocation/update?status=${actionType === "approve"}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json", ...authHeader() },

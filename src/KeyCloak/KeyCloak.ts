@@ -7,4 +7,10 @@ const keycloak = new Keycloak({
  
 });
 
+// const keycloak = new Keycloak({
+//   url: "https://161.118.167.160:31457",
+//   realm: "springboot-test",
+//   clientId: "react-app"
+// });
+
 export default keycloak;

@@ -113,6 +113,16 @@ const getBookTypeLabel = (typeValue: number) => {
     }
   };
 
+  const handleAddBookSubmit = async (book: any) => {
+    try {
+      const { message } = await BooksService.addBook(book);
+      setSnackbar({ open: true, message, type: "success" });
+      loadBooks();
+    } catch (error: any) {
+      setSnackbar({ open: true, message: error.message || "Book add failed", type: "error" });
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CustomSnackbar 
@@ -184,7 +194,7 @@ const getBookTypeLabel = (typeValue: number) => {
           <Button variant="contained" color="primary" onClick={() => addBookRef.current?.openDialog()}>
             Add New Book
           </Button>
-          <AddBook ref={addBookRef} onBookSubmit={loadBooks} />
+          <AddBook ref={addBookRef} onBookSubmit={handleAddBookSubmit} />
         </Box>
 
         <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 250px)' }}>
