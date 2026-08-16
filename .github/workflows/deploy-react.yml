@@ -17,16 +17,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
-        run: |
-          docker build \
-            --build-arg REACT_APP_API_URL=/api \
-            -t rishavcse1/rssb-react:${{ github.sha }} \
-            .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push Docker image
-        run: |
-          docker push rishavcse1/rssb-react:${{ github.sha }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/arm64
+          tags: rishavcse1/rssb-react:${{ github.sha }}
+          build-args: |
+            REACT_APP_API_URL=/api
 
       - name: Deploy React to Kubernetes
         uses: appleboy/ssh-action@v1.2.2
